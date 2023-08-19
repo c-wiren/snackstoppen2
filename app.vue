@@ -1,12 +1,12 @@
 <template>
-  <header>
-    <routerLink to="/">Snackstoppen</routerLink>
-    <routerLink to="/">Hem</routerLink>
-    <routerLink to="/snacks">Snacks</routerLink>
-    <routerLink to="/toppen">Toppen</routerLink>
-    <routerLink to="/om-sidan">Om sidan</routerLink>
-  </header>
   <NuxtLayout>
+    <header>
+      <RouterLink to="/">Snackstoppen</RouterLink>
+      <RouterLink to="/">Hem</RouterLink>
+      <RouterLink to="/snacks">Snacks</RouterLink>
+      <RouterLink to="/toppen">Toppen</RouterLink>
+      <RouterLink to="/om-sidan">Om sidan</RouterLink>
+    </header>
     <NuxtPage />
   </NuxtLayout>
 </template>

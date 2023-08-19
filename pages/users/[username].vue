@@ -6,8 +6,10 @@ const reviews = await api.getUserReviews(route.params.username.toString());
 </script>
 
 <template>
-  <h1>{{ user?.username }}</h1>
-  {{ user }}
-  <h2>Reviews</h2>
-  {{ reviews }}
+  <div>
+    <h1>{{ user?.username }}</h1>
+    {{ user }}
+    <h2>Reviews</h2>
+    {{ reviews }}
+  </div>
 </template>

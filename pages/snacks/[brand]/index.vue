@@ -6,8 +6,10 @@ const snacks = await api.getSnacks();
 </script>
 
 <template>
-  <h1>{{ brand?.name }}</h1>
   <div>
-    <routerLink v-for="snack in snacks" :to="snack.brand?.id + '/' + snack.slug">{{ snack.brand?.name }} - {{ snack.name }} </routerLink>
+    <h1>{{ brand?.name }}</h1>
+    <RouterLink v-for="snack in snacks" :key="snack.name" :to="snack.brand?.id + '/' + snack.slug"
+      >{{ snack.brand?.name }} - {{ snack.name }}
+    </RouterLink>
   </div>
 </template>
