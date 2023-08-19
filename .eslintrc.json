@@ -8,15 +8,19 @@
   "parserOptions": {
     "parser": "@typescript-eslint/parser"
   },
-  "extends": [
-    "plugin:vue/base",
-    "@nuxtjs/eslint-config-typescript",
-    "plugin:prettier/recommended"
-  ],
+  "extends": ["plugin:vue/base", "@nuxtjs/eslint-config-typescript", "plugin:prettier/recommended"],
   "plugins": ["prettier"],
   "rules": {
     "require-await": "warn",
     "@typescript-eslint/no-unused-vars": "warn",
-    "vue/component-name-in-template-casing": true
+    "prettier/prettier": ["warn", { "endOfLine": "auto" }],
+    "vue/component-name-in-template-casing": [
+      "error",
+      "PascalCase",
+      {
+        "registeredComponentsOnly": false,
+        "ignores": []
+      }
+    ]
   }
 }
