@@ -15,7 +15,7 @@
             </div>
           </RouterLink>
           <!-- Removed  -->
-          <MenuButton class="cursor-pointer md:hidden" :active="toggle" @click="toggle = !toggle" />
+          <MenuButton class="cursor-pointer md:hidden" :active="isOpen" @click="isOpen = !isOpen" />
         </div>
         <!-- DESKTOP -->
         <nav
@@ -73,7 +73,7 @@
       </div>
       <!-- MOBILE -->
       <nav
-        v-show="toggle"
+        v-show="isOpen"
         ref="mobile-nav"
         class="flex h-screen flex-col justify-center gap-2 pb-44 md:hidden"
       >
@@ -92,7 +92,8 @@
 import { ref } from "vue";
 import { MagnifyingGlassIcon, UserCircleIcon } from "@heroicons/vue/20/solid";
 
-const toggle = ref(false);
+const isOpen = ref(false);
+const route = useRoute();
 
 const nav = [
   { name: "Hem", to: "/" },
@@ -100,4 +101,12 @@ const nav = [
   { name: "Toppen", to: { name: "toppen" } },
   { name: "Om sidan", to: { name: "om-sidan" } },
 ];
+
+// Close mobile menu on route change
+watch(
+  () => route.name,
+  () => {
+    isOpen.value = false;
+  }
+);
 </script>
