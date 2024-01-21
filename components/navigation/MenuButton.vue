@@ -1,6 +1,7 @@
 <template>
   <div class="menu-button" :class="{ active }">
     <span class="menu-button bar top"></span>
+    <span class="menu-button bar middle"></span>
     <span class="menu-button bar bottom"></span>
   </div>
 </template>
@@ -16,13 +17,15 @@ export default {
 </script>
 <style scoped>
 .menu-button {
+  margin-left: 4px;
   width: 24px;
   height: 24px;
   position: relative;
 }
 .menu-button .bar {
-  height: 2px;
+  height: 2.5px;
   width: 100%;
+  border-radius: 1.25px;
   position: absolute;
   background-color: white;
   transition:
@@ -35,18 +38,28 @@ export default {
     transform 0.2s 0.05s;
 }
 .menu-button .top {
-  top: 8px;
+  top: 4px;
 }
+
+.menu-button .middle {
+  top: 11px;
+}
+
 .menu-button .bottom {
-  top: 14px;
+  top: 18px;
 }
 
 .menu-button.active .top {
   transform: rotate(45deg);
-  top: 10px;
+  top: 11px;
 }
+
+.menu-button.active .middle {
+  opacity: 0;
+}
+
 .menu-button.active .bottom {
   transform: rotate(-45deg);
-  top: 10px;
+  top: 11px;
 }
 </style>
