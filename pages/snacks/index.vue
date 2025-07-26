@@ -8,18 +8,20 @@ const snacks = await api.getSnacks();
   <div>
     <h1>Snacks</h1>
     <div>
-      <RouterLink v-for="brand in brands" :key="brand.name" :to="'snacks/' + brand.id">{{
-        brand?.name
-      }}</RouterLink>
+      <NuxtLink v-for="brand in brands" :key="brand.name" :to="'snacks/' + brand.id">
+        <img :src="brand.image?.lg" class="w-32" />
+        {{
+          brand?.name
+        }}
+      </NuxtLink>
     </div>
     <div>
-      <RouterLink
-        v-for="snack in snacks"
-        :key="snack.name"
-        :to="'snacks/' + snack.brand?.id + '/' + snack.slug"
-        >{{ snack.brand?.name }} -
+      <NuxtLink v-for="snack in snacks" :key="snack.name" :to="'snacks/' + snack.brand?.id + '/' + snack.slug">
+        <img :src="snack.image?.lg" class="w-32" />
+        {{
+          snack.brand?.name }} -
         {{ snack.name }}
-      </RouterLink>
+      </NuxtLink>
     </div>
   </div>
 </template>

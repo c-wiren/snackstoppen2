@@ -7,13 +7,13 @@
         <!-- LEFT SIDE -->
         <div class="flex flex-1 items-center">
           <!-- DESKTOP LOGO -->
-          <RouterLink to="/">
+          <NuxtLink to="/">
             <div
               class="ml-2 mr-6 hidden select-none font-semibold uppercase tracking-widest md:block"
             >
               Snackstoppen
             </div>
-          </RouterLink>
+          </NuxtLink>
           <!-- Removed  -->
           <MenuButton class="cursor-pointer md:hidden" :active="isOpen" @click="isOpen = !isOpen" />
         </div>
@@ -21,20 +21,20 @@
         <nav
           class="hidden justify-center font-mono font-bold uppercase tracking-widest md:flex md:space-x-6"
         >
-          <RouterLink
+          <NuxtLink
             v-for="item in nav"
             :key="item.name"
             :to="item.to"
             class="rounded px-2 py-1 transition hover:bg-white hover:bg-opacity-20 active:bg-opacity-40"
-            >{{ item.name }}</RouterLink
+            >{{ item.name }}</NuxtLink
           >
         </nav>
         <!-- MOBILE LOGO -->
-        <RouterLink to="/">
+        <NuxtLink to="/">
           <div class="select-none font-semibold uppercase tracking-widest md:hidden">
             Snackstoppen
           </div>
-        </RouterLink>
+        </NuxtLink>
         <!-- RIGHT SIDE -->
         <div class="ml-4 flex flex-1 items-center justify-end gap-2">
           <button
@@ -77,12 +77,12 @@
         ref="mobile-nav"
         class="flex h-screen flex-col justify-center gap-2 pb-44 md:hidden"
       >
-        <RouterLink
+        <NuxtLink
           v-for="item in nav"
           :key="item.name"
           :to="item.to"
           class="block rounded-md px-2 py-2 text-center font-mono text-3xl font-bold uppercase tracking-widest text-white active:bg-white active:bg-opacity-20"
-          >{{ item.name }}</RouterLink
+          >{{ item.name }}</NuxtLink
         >
       </nav>
     </header>
