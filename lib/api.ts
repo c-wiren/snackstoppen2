@@ -5,7 +5,9 @@ import Client from '@c-wiren/safe-router/client';
 
 import type { Schema } from './schema/schema';
 import type * as Types from './schema/types';
-import type { GetSnacksParams } from './schema/input-types';
+import type { GetSnacksParams, ResetPasswordParams, SignupParams } from './schema/input-types';
+
+type Result<T> = { ok: true, value: T; } | { ok: false, error: { error: string; type: 'Client' | 'Server'; }; };
 
 const client = Client<Schema>(API_URL);
 
@@ -28,9 +30,11 @@ type Brand = Replace<Types.Brand, {
 type Store = {
     snacks: Record<string, Snack>;
     brands: Record<string, Brand>;
+    users: Record<string, Types.User>;
+    user?: Types.User;
 };
 
-const defaultStore = () => ({ snacks: {}, brands: {} });
+const defaultStore = () => ({ snacks: {}, brands: {}, users: {}, user: undefined });
 
 const store: Store = reactive(defaultStore());
 
@@ -127,6 +131,117 @@ async function getSnackReviews(brand: string, slug: string) {
     return brand === "olw" && slug === "sourcream-and-onion" ? [mockReview] : undefined;
 }
 
+function getCurrentUser(): Types.User | undefined {
+    return store.user;
+}
+
+async function login(user: string, password: string): Promise<Result<void>> {
+    const result = await client('login', { user, password });
+    if (result.ok) {
+        localStorage.setItem('token', result.value.token);
+        localStorage.setItem('refresh', result.value.refreshToken);
+        localStorage.setItem('user', JSON.stringify(result.value.user));
+        store.users[result.value.user.username!] = result.value.user;
+        store.user = result.value.user;
+        return { ok: true, value: undefined };
+    }
+    else {
+        return result;
+    }
+}
+
+function logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refresh');
+    localStorage.removeItem('user');
+    if (store.user) {
+        store.user.email = undefined;
+        store.user = undefined;
+    }
+}
+
+async function logoutAll(): Promise<Result<void>> {
+    const result = await client('logoutAll', undefined);
+    if (result.ok) {
+        logout();
+    }
+    return result;
+}
+
+async function refresh(): Promise<Result<void>> {
+    const token = localStorage.getItem('refresh');
+    if (token) {
+        const result = await client('refresh', { token });
+        if (result.ok) {
+            localStorage.setItem('token', result.value.token);
+            localStorage.setItem('refresh', result.value.refreshToken);
+            localStorage.setItem('user', JSON.stringify(result.value.user));
+            store.users[result.value.user.username!] = result.value.user;
+            store.user = result.value.user;
+        }
+        else {
+            if (result.error.error === 'TokenInvalid') {
+                logout();
+            }
+            else {
+                return result;
+            }
+        }
+        return { ok: true, value: undefined };
+    }
+    else {
+        logout();
+        return { ok: false, error: { error: 'TokenInvalid', type: 'Client' } };
+    }
+}
+
+function loadSession(): boolean {
+    const user = JSON.parse(localStorage.getItem('user') ?? 'null');
+    if (user) {
+        store.users[user.username!] = user;
+        store.user = user;
+        return true;
+    }
+    return false;
+}
+
+async function signup(params: SignupParams): Promise<Result<void>> {
+    const result = await client('signup', params);
+    if (result.ok) {
+        localStorage.setItem('token', result.value.token);
+        localStorage.setItem('refresh', result.value.refreshToken);
+        localStorage.setItem('user', JSON.stringify(result.value.user));
+        store.users[result.value.user.username!] = result.value.user;
+        store.user = result.value.user;
+        return { ok: true, value: undefined };
+    }
+    else { return result; }
+}
+
+async function verifyEmail(email: string) {
+    return client('verifyEmail', { email });
+}
+
+async function requestResetPassword(email: string) {
+    return client('requestResetPassword', { email });
+}
+
+async function resetPassword(params: ResetPasswordParams) {
+    const result = await client('resetPassword', params);
+    if (result.ok) {
+        localStorage.setItem('token', result.value.token);
+        localStorage.setItem('refresh', result.value.refreshToken);
+        localStorage.setItem('user', JSON.stringify(result.value.user));
+        store.users[result.value.user.username!] = result.value.user;
+        store.user = result.value.user;
+        return { ok: true, value: undefined };
+    }
+    else { return result; }
+}
+
+async function getUserAvailability(username: string) {
+    return client('getUsernameAvailability', { username });
+}
 
 export default {
     getSnack,
@@ -135,5 +250,18 @@ export default {
     getBrands,
     getUser,
     getUserReviews,
-    getSnackReviews
+    getSnackReviews,
+    login,
+    logout,
+    logoutAll,
+    refresh,
+    signup,
+    verifyEmail,
+    requestResetPassword,
+    resetPassword,
+    getUserAvailability,
+    loadSession,
+    get currentUser() {
+        return store.user;
+    }
 };

@@ -58,7 +58,7 @@ export type Review = {
     liked?: boolean;
 };
 
-export type Login = { token: string; };
+export type Login = { token: string; refreshToken: string; user: User; };
 
 export type Verification = { verificationToken: string; };
 

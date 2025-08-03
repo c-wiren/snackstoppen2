@@ -1,6 +1,6 @@
 import { z } from 'zod';
+import type { IsInput } from './input-types-config.ts';
 
-type IsInput = true;
 type Infer<T extends z.ZodTypeAny> = IsInput extends true ? z.input<T> : z.infer<T>;
 
 const getSnack = z.object({
