@@ -5,11 +5,47 @@ import Client from '@c-wiren/safe-router/client';
 
 import type { Schema } from './schema/schema';
 import type * as Types from './schema/types';
-import type { GetSnacksParams, ResetPasswordParams, SignupParams } from './schema/input-types';
+import type { CreateReviewParams, GetReviewParams, GetReviewsParams, GetSnacksParams, GetUsersParams, ResetPasswordParams, SignupParams } from './schema/input-types';
 
 type Result<T> = { ok: true, value: T; } | { ok: false, error: { error: string; type: 'Client' | 'Server'; }; };
 
 const client = Client<Schema>(API_URL);
+
+let refreshPromise: Promise<Result<void>> | null = null;
+
+async function getToken(): Promise<string | null> {
+    if (refreshPromise !== null) { await refreshPromise; }
+    let token = null;
+    try {
+        token = localStorage.getItem("token");
+    } catch { }
+    if (token) { return "Bearer " + token; }
+    return null;
+}
+
+// Call client with auth and handle invalid auth
+async function client_auth<T extends Parameters<typeof client>[0]>(...args: Parameters<typeof client<T>>) {
+    if (!args[2]) args[2] = {};
+    const Authorization = await getToken();
+    if (Authorization) {
+        args[2].headers = Object.assign(args[2].headers ?? {}, { Authorization });
+    }
+    const result = await client(...args);
+    if (!result.ok && result.error.error == 'TokenInvalid') {
+        if (refreshPromise === null) {
+            refreshPromise = refresh();
+            await refreshPromise;
+            refreshPromise = null;
+        }
+        delete (args[2].headers as Record<string, string>).Authorization;
+        const Authorization = await getToken();
+        if (Authorization) {
+            args[2].headers = Object.assign(args[2].headers ?? {}, { Authorization });
+        }
+        return client(...args);
+    }
+    return result;
+}
 
 type Replace<T, U> = Omit<T, keyof U> & U;
 
@@ -33,6 +69,8 @@ type Store = {
     users: Record<string, Types.User>;
     user?: Types.User;
 };
+
+type User = Types.User;
 
 const defaultStore = () => ({ snacks: {}, brands: {}, users: {}, user: undefined });
 
@@ -63,76 +101,63 @@ function onFetchBrand(brand: Types.Brand): Brand {
     return store.brands[brand.id];
 }
 
-const mockUser = {
-    id: 0,
-    username: "chipsfantast1",
-    created: Date.now(),
-    followers: 5,
-    following: 3,
-};
-const mockReview = {
-    id: 0,
-    snack: null,
-    rating: 8,
-    user: mockUser,
-    review: "Sveriges stolthet",
-    created: Date.now(),
-    likes: 4,
-};
+function onFetchUser(user: Types.User): User {
+    store.users[user.username!] = Object.assign(store.users[user.username!] ?? {}, user);
+    return store.users[user.username!];
+}
 
 async function getBrands() {
     if (store.brands.length) { return store.brands; }
     const result = await client('getBrands', undefined);
+
     if (result.ok) {
-        for (let i = 0; i < result.value.length; i++) {
-            const brand = result.value[i];
-            onFetchBrand(brand);
-        }
+        for (const brand of result.value) { onFetchBrand(brand); }
         return store.brands;
     }
     else { throw result.error.error; }
 }
 
-async function getBrand(brand: string) {
-    getBrands();
-    return store.brands[brand];
+async function getBrand(brand: string): Promise<Brand | null> {
+    await getBrands();
+    return store.brands[brand] ?? null;
 }
 
 async function getSnacks(params: GetSnacksParams = {}) {
     let result = await client('getSnacks', params);
     let snacks: Snack[] = [];
     if (result.ok) {
-        for (let i = 0; i < result.value.length; i++) {
-            snacks.push(onFetchSnack(result.value[i]));
-        }
+        for (const snack of result.value) { snacks.push(onFetchSnack(snack)); }
         return snacks;
     } else { throw result.error.error; }
 }
 
-async function getSnack(brand: string, slug: string) {
+async function getSnack(brand: string, slug: string): Promise<Snack | null> {
     const brandSlug = `${brand}/${slug}`;
     if (store.snacks[brandSlug]) { return store.snacks[brandSlug]; }
     const result = await client('getSnack', { brand, slug });
-    if (result.ok) {
-        return onFetchSnack(result.value);
+    if (result.ok) { return onFetchSnack(result.value); }
+    else {
+        if (result.error.error === 'NotFound') { return null; }
+        else { throw result.error.error; }
     }
-    else { throw result.error.error; }
 };
 
-async function getUser(username: string) {
-    return username === "chipsfantast1" ? mockUser : undefined;
+async function getUser(username: string): Promise<User | null> {
+    const result = await client_auth('getUser', { username });
+    if (result.ok) { return onFetchUser(result.value); }
+    else {
+        if (result.error.error === 'NotFound') { return null; }
+        else { throw result.error; }
+    }
 }
 
-async function getUserReviews(username: string) {
-    return username === "chipsfantast1" ? [mockReview] : undefined;
-}
-
-async function getSnackReviews(brand: string, slug: string) {
-    return brand === "olw" && slug === "sourcream-and-onion" ? [mockReview] : undefined;
-}
-
-function getCurrentUser(): Types.User | undefined {
-    return store.user;
+async function getUsers(params: GetUsersParams) {
+    const result = await client_auth('getUsers', params);
+    let users: User[] = [];
+    if (result.ok) {
+        for (const user of result.value) { users.push(onFetchUser(user)); }
+        return users;
+    } else { throw result.error; }
 }
 
 async function login(user: string, password: string): Promise<Result<void>> {
@@ -161,7 +186,7 @@ function logout(): void {
 }
 
 async function logoutAll(): Promise<Result<void>> {
-    const result = await client('logoutAll', undefined);
+    const result = await client_auth('logoutAll', undefined);
     if (result.ok) {
         logout();
     }
@@ -180,12 +205,13 @@ async function refresh(): Promise<Result<void>> {
             store.user = result.value.user;
         }
         else {
-            if (result.error.error === 'TokenInvalid') {
-                logout();
-            }
-            else {
-                return result;
-            }
+            // TODO: Handle other cases
+            // if (result.error.error === 'TokenInvalid') {
+            logout();
+            // }
+            // else {
+            //     return result;
+            // }
         }
         return { ok: true, value: undefined };
     }
@@ -243,14 +269,32 @@ async function getUserAvailability(username: string) {
     return client('getUsernameAvailability', { username });
 }
 
+async function createReview(params: CreateReviewParams) {
+    return client_auth('createReview', params);
+}
+
+async function getReview(params: GetReviewParams) {
+    const result = await client_auth('getReview', params);
+    if (result.ok) { return result.value; }
+    else {
+        if (result.error.error === 'NotFound') { return null; }
+        else { throw result.error; };
+    }
+}
+
+async function getReviews(params: GetReviewsParams) {
+    const result = await client_auth('getReviews', params);
+    if (result.ok) { return result.value; }
+    else { throw result.error; }
+}
+
 export default {
     getSnack,
     getSnacks,
     getBrand,
     getBrands,
     getUser,
-    getUserReviews,
-    getSnackReviews,
+    getUsers,
     login,
     logout,
     logoutAll,
@@ -261,6 +305,9 @@ export default {
     resetPassword,
     getUserAvailability,
     loadSession,
+    createReview,
+    getReview,
+    getReviews,
     get currentUser() {
         return store.user;
     }
