@@ -3,6 +3,7 @@
         <button @click="state.overlay = null" class="absolute top-0 right-0 p-2">✕</button>
         <h1>Ditt konto</h1>
         <h2>{{ api.currentUser?.username }}</h2>
+        <NuxtLink :to="'/users/' + api.currentUser?.username" class="block">Din profil</NuxtLink>
         <button @click="logout">Logga ut</button>
     </div>
 </template>

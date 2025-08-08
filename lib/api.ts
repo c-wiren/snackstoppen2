@@ -5,7 +5,7 @@ import Client from '@c-wiren/safe-router/client';
 
 import type { Schema } from './schema/schema';
 import type * as Types from './schema/types';
-import type { CreateReviewParams, GetReviewParams, GetReviewsParams, GetSnacksParams, GetUsersParams, ResetPasswordParams, SignupParams } from './schema/input-types';
+import type { GetActivityParams, GetReviewParams, GetReviewsParams, GetSnacksParams, GetUsersParams, ResetPasswordParams, SignupParams } from './schema/input-types';
 
 type Result<T> = { ok: true, value: T; } | { ok: false, error: { error: string; type: 'Client' | 'Server'; }; };
 
@@ -49,30 +49,39 @@ async function client_auth<T extends Parameters<typeof client>[0]>(...args: Para
 
 type Replace<T, U> = Omit<T, keyof U> & U;
 
-type Snack = Replace<Types.Snack, {
+export type Brand = Replace<Types.Brand, {
     image?: {
         sm: string;
         lg: string;
     };
 }>;
 
-type Brand = Replace<Types.Brand, {
+export type Snack = Replace<Types.Snack, {
     image?: {
         sm: string;
         lg: string;
     };
+    brand: Brand;
 }>;
+
+
+export type Review = Replace<Types.Review, {
+    snack: Snack,
+    user: User;
+}>;
+
+export type User = Types.User;
 
 type Store = {
     snacks: Record<string, Snack>;
     brands: Record<string, Brand>;
-    users: Record<string, Types.User>;
+    users: Record<string, User>;
+    reviews: Record<number, Review>;
     user?: Types.User;
 };
 
-type User = Types.User;
 
-const defaultStore = () => ({ snacks: {}, brands: {}, users: {}, user: undefined });
+const defaultStore = () => ({ snacks: {}, brands: {}, users: {}, user: undefined, reviews: {} });
 
 const store: Store = reactive(defaultStore());
 
@@ -84,8 +93,17 @@ function onFetchSnack(snack: Types.Snack): Snack {
             lg: `${STATIC_URL}/snacks/${snack.image}.webp`
         };
     }
+    let brand;
+    if (snack.brand) {
+        if (store.brands[snack.brand.id]) {
+            brand = store.brands[snack.brand.id];
+        } else {
+            brand = onFetchBrand(snack.brand);
+
+        }
+    }
     const brandSlug = `${snack.brand?.id}/${snack.slug}`;
-    store.snacks[brandSlug] = Object.assign(store.snacks[brandSlug] ?? {}, snack, { image });
+    store.snacks[brandSlug] = Object.assign(store.snacks[brandSlug] ?? {}, snack, { image, brand });
     return store.snacks[brandSlug];
 }
 
@@ -104,6 +122,28 @@ function onFetchBrand(brand: Types.Brand): Brand {
 function onFetchUser(user: Types.User): User {
     store.users[user.username!] = Object.assign(store.users[user.username!] ?? {}, user);
     return store.users[user.username!];
+}
+
+function onFetchReview(review: Types.Review): Review {
+    let snack;
+    if (review.snack && review.snack.slug && review.snack.brand) {
+        const brandSlug = `${review.snack.brand?.id}/${review.snack.slug}`;
+        if (store.snacks[brandSlug]) {
+            snack = store.snacks[brandSlug];
+        } else {
+            snack = onFetchSnack(review.snack);
+        }
+    }
+    let user;
+    if (review.user && review.user.username) {
+        if (store.users[review.user.username]) {
+            user = store.users[review.user.username];
+        } else {
+            user = onFetchUser(review.user);
+        }
+    }
+    store.reviews[review.id] = Object.assign(store.reviews[review.id] ?? {}, review, { snack, user });
+    return store.reviews[review.id];
 }
 
 async function getBrands() {
@@ -269,23 +309,105 @@ async function getUserAvailability(username: string) {
     return client('getUsernameAvailability', { username });
 }
 
-async function createReview(params: CreateReviewParams) {
-    return client_auth('createReview', params);
+async function createReview(
+    snack: Snack,
+    rating: number,
+    review: string | undefined = undefined): Promise<Result<Review>> {
+    const result = await client_auth('createReview', { snackId: snack.id, rating, review });
+    if (result.ok) {
+        return { ok: true, value: onFetchReview(result.value) };
+    } else {
+        return result;
+    }
 }
 
-async function getReview(params: GetReviewParams) {
+async function getReview(params: GetReviewParams): Promise<Review | null> {
     const result = await client_auth('getReview', params);
-    if (result.ok) { return result.value; }
+    if (result.ok) {
+        return onFetchReview(result.value);
+    }
     else {
         if (result.error.error === 'NotFound') { return null; }
         else { throw result.error; };
     }
 }
 
-async function getReviews(params: GetReviewsParams) {
+async function getReviews(params: GetReviewsParams): Promise<Review[]> {
     const result = await client_auth('getReviews', params);
-    if (result.ok) { return result.value; }
-    else { throw result.error; }
+    const reviews: Review[] = [];
+    if (result.ok) {
+        for (const review of result.value) { reviews.push(onFetchReview(review)); }
+        return reviews;
+    } else { throw result.error; }
+}
+
+async function getActivity(params: GetActivityParams = {}): Promise<Review[] | null> {
+    if (!store.user) { return null; }
+    const result = await client_auth('getActivity', params);
+    const reviews: Review[] = [];
+    if (result.ok) {
+        for (const review of result.value) { reviews.push(onFetchReview(review)); }
+        return reviews;
+    } else {
+        if (result.error.error === 'Unauthorized') { return null; }
+        throw result.error;
+    }
+}
+
+async function like(review: Review): Promise<Result<void>> {
+    if (review.liked) { return { ok: true, value: undefined }; }
+    review.liked = true;
+    if (review.likes !== undefined) { review.likes++; }
+    const result = await client_auth('like', { reviewId: review.id });
+    if (!result.ok) {
+        review.liked = false;
+        if (review.likes !== undefined) { review.likes--; }
+        return result;
+    }
+    return { ok: true, value: undefined };
+}
+
+async function unlike(review: Review): Promise<Result<void>> {
+    if (!review.liked) { return { ok: true, value: undefined }; }
+    review.liked = false;
+    if (review.likes !== undefined) { review.likes--; }
+    const result = await client_auth('unlike', { reviewId: review.id });
+    if (!result.ok) {
+        review.liked = true;
+        if (review.likes !== undefined) { review.likes++; }
+        return result;
+    }
+    return { ok: true, value: undefined };
+}
+
+async function follow(user: User): Promise<Result<void>> {
+    if (store.user && store.user.following !== undefined) { store.user.following++; }
+    if (user.follow) { return { ok: true, value: undefined }; }
+    user.follow = true;
+    if (user.followers !== undefined) { user.followers++; }
+    const result = await client_auth('follow', { followsUserId: user.id });
+    if (!result.ok) {
+        user.follow = false;
+        if (user.followers !== undefined) { user.followers--; }
+        if (store.user && store.user.following !== undefined) { store.user.following--; }
+        return result;
+    }
+    return { ok: true, value: undefined };
+}
+
+async function unfollow(user: User): Promise<Result<void>> {
+    if (store.user && store.user.following !== undefined) { store.user.following--; }
+    if (!user.follow) { return { ok: true, value: undefined }; }
+    user.follow = false;
+    if (user.followers !== undefined) { user.followers--; }
+    const result = await client_auth('unfollow', { followsUserId: user.id });
+    if (!result.ok) {
+        user.follow = true;
+        if (user.followers !== undefined) { user.followers++; }
+        if (store.user && store.user.following !== undefined) { store.user.following++; }
+        return result;
+    }
+    return { ok: true, value: undefined };
 }
 
 export default {
@@ -308,6 +430,11 @@ export default {
     createReview,
     getReview,
     getReviews,
+    getActivity,
+    like,
+    unlike,
+    follow,
+    unfollow,
     get currentUser() {
         return store.user;
     }

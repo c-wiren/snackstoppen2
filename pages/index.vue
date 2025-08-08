@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import api from "@/lib/api";
+</script>
+
 <template>
-  <h1>Hem</h1>
+  <div>
+    <h1>Hem</h1>
+  </div>
 </template>

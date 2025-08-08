@@ -19,5 +19,9 @@ import api from "@/lib/api";
 
 onMounted(() => {
   api.loadSession();
+  const router = useRouter();
+  router.afterEach(() => {
+    state.overlay = null;
+  });
 });
 </script>
