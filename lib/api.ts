@@ -6,8 +6,16 @@ import Client from '@c-wiren/safe-router/client';
 import type { Schema } from './schema/schema';
 import type * as Types from './schema/types';
 import type { GetActivityParams, GetReviewParams, GetReviewsParams, GetSnacksParams, GetUsersParams, ResetPasswordParams, SignupParams } from './schema/input-types';
+import type { UnwrapRef } from 'vue';
 
 type Result<T> = { ok: true, value: T; } | { ok: false, error: { error: string; type: 'Client' | 'Server'; }; };
+
+// Immediately returns a null reference and loads in the background
+export function asyncRef<T>(fn: () => Promise<T>) {
+    const result = ref<T | null>(null);
+    fn().then(x => result.value = x as UnwrapRef<T>);
+    return result;
+}
 
 const client = Client<Schema>(API_URL);
 
@@ -173,22 +181,29 @@ async function getSnacks(params: GetSnacksParams = {}) {
 
 async function getSnack(brand: string, slug: string): Promise<Snack | null> {
     const brandSlug = `${brand}/${slug}`;
+    const promise = (async () => {
+        const result = await client('getSnack', { brand, slug });
+        if (result.ok) { return onFetchSnack(result.value); }
+        else {
+            if (result.error.error === 'NotFound') { return null; }
+            else { throw result.error.error; }
+        }
+    })();
     if (store.snacks[brandSlug]) { return store.snacks[brandSlug]; }
-    const result = await client('getSnack', { brand, slug });
-    if (result.ok) { return onFetchSnack(result.value); }
-    else {
-        if (result.error.error === 'NotFound') { return null; }
-        else { throw result.error.error; }
-    }
+    else { return promise; }
 };
 
 async function getUser(username: string): Promise<User | null> {
-    const result = await client_auth('getUser', { username });
-    if (result.ok) { return onFetchUser(result.value); }
-    else {
-        if (result.error.error === 'NotFound') { return null; }
-        else { throw result.error; }
-    }
+    const promise = (async () => {
+        const result = await client_auth('getUser', { username });
+        if (result.ok) { return onFetchUser(result.value); }
+        else {
+            if (result.error.error === 'NotFound') { return null; }
+            else { throw result.error; }
+        }
+    })();
+    if (store.users[username]) { return store.users[username]; }
+    else { return promise; }
 }
 
 async function getUsers(params: GetUsersParams) {

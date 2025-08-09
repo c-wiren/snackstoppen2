@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import api from "@/lib/api";
+import api, { asyncRef } from "@/lib/api";
 const route = useRoute();
 const snack = await api.getSnack(route.params.brand as string, route.params.slug as string);
 if (!snack) { throw createError({ statusCode: 404 }); }
-const reviews = await api.getReviews(
+const reviews = asyncRef(() => api.getReviews(
   {
     brand: route.params.brand as string,
     slug: route.params.slug as string
   }
-);
+));
 </script>
 
 <template>
