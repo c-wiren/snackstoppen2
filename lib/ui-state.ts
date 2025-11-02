@@ -1,7 +1,7 @@
 // TODO: Improve this
 
 type Store = {
-    overlay: 'login' | 'search' | 'account' | 'signup' | null;
+  overlay: "login" | "search" | "account" | "signup" | null;
 };
 
 const defaultStore = () => ({ overlay: null });

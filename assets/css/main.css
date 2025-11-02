@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 body {
-@apply min-h-screen;
+  @apply min-h-screen;
 }
 
 h1 {
-@apply text-2xl font-bold;
+  @apply text-2xl font-bold;
 }

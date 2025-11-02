@@ -3,7 +3,9 @@ import api, { asyncRef } from "@/lib/api";
 const route = useRoute();
 const username = route.params.username as string;
 const user = await api.getUser(username);
-if (!user) { throw createError({ statusCode: 404 }); }
+if (!user) {
+  throw createError({ statusCode: 404 });
+}
 const reviews = asyncRef(() => api.getReviews({ username }));
 </script>
 
