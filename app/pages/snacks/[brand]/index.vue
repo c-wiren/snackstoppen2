@@ -2,7 +2,9 @@
 import api from "@/lib/api";
 const route = useRoute();
 const brand = await api.getBrand(route.params.brand as string);
-if (!brand) { throw createError({ statusCode: 404 }); }
+if (!brand) {
+  throw createError({ statusCode: 404 });
+}
 const snacks = await api.getSnacks({ brand: route.params.brand as string });
 </script>
 
@@ -10,8 +12,8 @@ const snacks = await api.getSnacks({ brand: route.params.brand as string });
   <div>
     <img :src="brand.image?.lg" class="w-32" />
     <h1>{{ brand.name }}</h1>
-    <NuxtLink v-for="snack in snacks" :key="snack.name" :to="snack.brand?.id + '/' + snack.slug">{{ snack.brand?.name }}
-      - {{ snack.name }}
+    <NuxtLink v-for="snack in snacks" :key="snack.name" :to="snack.brand?.id + '/' + snack.slug"
+      >{{ snack.brand?.name }} - {{ snack.name }}
     </NuxtLink>
   </div>
 </template>

@@ -10,16 +10,17 @@ const snacks = await api.getSnacks();
     <div>
       <NuxtLink v-for="brand in brands" :key="brand.name" :to="'snacks/' + brand.id">
         <img :src="brand.image?.lg" class="w-32" />
-        {{
-          brand?.name
-        }}
+        {{ brand?.name }}
       </NuxtLink>
     </div>
     <div>
-      <NuxtLink v-for="snack in snacks" :key="snack.name" :to="'snacks/' + snack.brand?.id + '/' + snack.slug">
+      <NuxtLink
+        v-for="snack in snacks"
+        :key="snack.name"
+        :to="'snacks/' + snack.brand?.id + '/' + snack.slug"
+      >
         <img :src="snack.image?.lg" class="w-32" />
-        {{
-          snack.brand?.name }} -
+        {{ snack.brand?.name }} -
         {{ snack.name }}
       </NuxtLink>
     </div>
