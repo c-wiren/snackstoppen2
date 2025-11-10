@@ -1,7 +1,7 @@
 <template>
   <div class="fixed top-0 z-20 mt-0 flex w-screen justify-center">
     <header
-      class="w-full bg-gradient-to-tr from-blue-700 to-blue-400 p-3 text-white shadow-lg shadow-blue-400/25 md:m-6 md:max-w-4xl md:rounded-xl"
+      class="w-full bg-linear-to-tr from-blue-700 to-blue-400 p-3 text-white shadow-lg shadow-blue-400/25 md:m-6 md:max-w-4xl md:rounded-xl"
     >
       <div class="flex items-center justify-between">
         <!-- LEFT SIDE -->
@@ -9,7 +9,7 @@
           <!-- DESKTOP LOGO -->
           <NuxtLink to="/">
             <div
-              class="ml-2 mr-6 hidden select-none font-semibold uppercase tracking-widest md:block"
+              class="mr-6 ml-2 hidden font-semibold tracking-widest uppercase select-none md:block"
             >
               Snackstoppen
             </div>
@@ -19,26 +19,26 @@
         </div>
         <!-- DESKTOP -->
         <nav
-          class="hidden justify-center font-mono font-bold uppercase tracking-widest md:flex md:space-x-6"
+          class="hidden justify-center font-mono font-bold tracking-widest uppercase md:flex md:space-x-6"
         >
           <NuxtLink
             v-for="item in nav"
             :key="item.name"
             :to="item.to"
-            class="rounded px-2 py-1 transition hover:bg-white hover:bg-opacity-20 active:bg-opacity-40"
+            class="active:bg-opacity-40 rounded-sm px-2 py-1 transition hover:bg-white/20"
             >{{ item.name }}
           </NuxtLink>
         </nav>
         <!-- MOBILE LOGO -->
         <NuxtLink to="/">
-          <div class="select-none font-semibold uppercase tracking-widest md:hidden">
+          <div class="font-semibold tracking-widest uppercase select-none md:hidden">
             Snackstoppen
           </div>
         </NuxtLink>
         <!-- RIGHT SIDE -->
         <div class="ml-4 flex flex-1 items-center justify-end gap-2">
           <button
-            class="rounded-md p-1 transition hover:bg-white hover:bg-opacity-20 active:bg-opacity-40"
+            class="active:bg-opacity-40 rounded-md p-1 transition hover:bg-white/20"
             @click="state.overlay = 'search'"
           >
             <MagnifyingGlassIcon class="h-6 w-6" />
@@ -46,7 +46,7 @@
           <!-- USER -->
           <template v-if="api.currentUser">
             <button
-              class="rounded-md p-1 transition hover:bg-white hover:bg-opacity-20 active:bg-opacity-40 md:px-2"
+              class="active:bg-opacity-40 rounded-md p-1 transition hover:bg-white/20 md:px-2"
               @click="state.overlay = 'account'"
             >
               <span class="mr-1 hidden align-middle font-semibold tracking-wider lg:inline-block">{{
@@ -57,13 +57,13 @@
           </template>
           <template v-else>
             <button
-              class="hidden h-full rounded-lg bg-blue-300 px-2 py-1 font-bold uppercase tracking-widest text-blue-700 transition hover:bg-opacity-75 md:block"
+              class="hover:bg-opacity-75 hidden h-full rounded-lg bg-blue-300 px-2 py-1 font-bold tracking-widest text-blue-700 uppercase transition md:block"
               @click="state.overlay = 'login'"
             >
               Logga in
             </button>
             <button
-              class="rounded-md p-1 transition hover:bg-white hover:bg-opacity-20 active:bg-opacity-40 md:hidden"
+              class="hover:bg-opacity-20 active:bg-opacity-40 rounded-md p-1 transition hover:bg-white md:hidden"
               @click="state.overlay = 'login'"
             >
               <UserCircleIcon class="block h-6 w-6" />
@@ -81,7 +81,7 @@
           v-for="item in nav"
           :key="item.name"
           :to="item.to"
-          class="block rounded-md px-2 py-2 text-center font-mono text-3xl font-bold uppercase tracking-widest text-white active:bg-white active:bg-opacity-20"
+          class="active:bg-opacity-20 block rounded-md px-2 py-2 text-center font-mono text-3xl font-bold tracking-widest text-white uppercase active:bg-white"
         >
           {{ item.name }}</NuxtLink
         >

@@ -7,7 +7,7 @@
   </NuxtLayout>
   <div
     v-if="state.overlay"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black"
     @click="state.overlay = null"
   >
     <Login v-if="state.overlay == 'login'" @click.stop></Login>

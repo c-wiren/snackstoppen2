@@ -1,7 +1,7 @@
 <!--TODO: Fix styling -->
 <template>
   <div class="relative bg-white p-4">
-    <button @click="state.overlay = null" class="absolute right-0 top-0 p-2">✕</button>
+    <button @click="state.overlay = null" class="absolute top-0 right-0 p-2">✕</button>
     <h1>Logga in</h1>
     <form @submit.prevent="login">
       <input

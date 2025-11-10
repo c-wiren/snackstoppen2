@@ -1,11 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-body {
-  @apply min-h-screen;
-}
+@layer base {
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+  }
 
-h1 {
-  @apply text-2xl font-bold;
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
