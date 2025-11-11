@@ -25,7 +25,7 @@
             v-for="item in nav"
             :key="item.name"
             :to="item.to"
-            class="active:bg-opacity-40 rounded-sm px-2 py-1 transition hover:bg-white/20"
+            class="rounded-sm px-2 py-1 transition hover:bg-white/20 active:bg-white/40"
             >{{ item.name }}
           </NuxtLink>
         </nav>
@@ -38,7 +38,7 @@
         <!-- RIGHT SIDE -->
         <div class="ml-4 flex flex-1 items-center justify-end gap-2">
           <button
-            class="active:bg-opacity-40 rounded-md p-1 transition hover:bg-white/20"
+            class="rounded-md p-1 transition hover:bg-white/20 active:bg-white/40"
             @click="state.overlay = 'search'"
           >
             <MagnifyingGlassIcon class="h-6 w-6" />
@@ -46,7 +46,7 @@
           <!-- USER -->
           <template v-if="api.currentUser">
             <button
-              class="active:bg-opacity-40 rounded-md p-1 transition hover:bg-white/20 md:px-2"
+              class="rounded-md p-1 transition hover:bg-white/20 active:bg-white/40 md:px-2"
               @click="state.overlay = 'account'"
             >
               <span class="mr-1 hidden align-middle font-semibold tracking-wider lg:inline-block">{{
@@ -57,13 +57,13 @@
           </template>
           <template v-else>
             <button
-              class="hover:bg-opacity-75 hidden h-full rounded-lg bg-blue-300 px-2 py-1 font-bold tracking-widest text-blue-700 uppercase transition md:block"
+              class="hidden h-full rounded-lg bg-blue-300 px-2 py-1 font-bold tracking-widest text-blue-700 uppercase transition hover:bg-blue-300/75 md:block"
               @click="state.overlay = 'login'"
             >
               Logga in
             </button>
             <button
-              class="hover:bg-opacity-20 active:bg-opacity-40 rounded-md p-1 transition hover:bg-white md:hidden"
+              class="rounded-md p-1 transition hover:bg-white/20 active:bg-white/40 md:hidden"
               @click="state.overlay = 'login'"
             >
               <UserCircleIcon class="block h-6 w-6" />
@@ -81,7 +81,7 @@
           v-for="item in nav"
           :key="item.name"
           :to="item.to"
-          class="active:bg-opacity-20 block rounded-md px-2 py-2 text-center font-mono text-3xl font-bold tracking-widest text-white uppercase active:bg-white"
+          class="block rounded-md px-2 py-2 text-center font-mono text-3xl font-bold tracking-widest text-white uppercase active:bg-white/20"
         >
           {{ item.name }}</NuxtLink
         >
