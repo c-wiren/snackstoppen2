@@ -1,13 +1,57 @@
 @import "tailwindcss";
 
+@theme {
+  --animate-shake: shake 1s ease-in-out;
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20%,
+    60% {
+      transform: translateX(-1rem);
+    }
+    40%,
+    80% {
+      transform: translateX(1rem);
+    }
+  }
+}
+
 @layer base {
+  body {
+    @apply font-medium tracking-wide;
+  }
+
   h1 {
-    font-size: var(--text-2xl);
+    font-size: var(--text-3xl);
     font-weight: 700;
   }
 
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+
+  .btn {
+    @apply rounded-xl border border-gray-300 px-3 py-2 font-bold shadow-sm focus:shadow-md;
+  }
+
+  .btn-primary {
+    @apply border-blue-600 bg-linear-to-tr from-blue-700 to-blue-500 text-white hover:from-blue-800 hover:to-blue-600;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    @apply rounded-xl border border-gray-300 px-3 py-2 shadow-xs focus:shadow-md;
+  }
+
+  label {
+    @apply mb-1 text-gray-700;
+  }
+
+  .dialog {
+    @apply relative rounded-2xl bg-white px-8 py-6 shadow-2xl;
   }
 }

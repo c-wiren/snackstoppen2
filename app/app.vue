@@ -9,6 +9,7 @@
     v-if="state.overlay"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
     @click="state.overlay = null"
+    @keydown.esc="state.overlay = null"
   >
     <Login v-if="state.overlay == 'login'" @click.stop></Login>
     <SignUp v-if="state.overlay == 'signup'" @click.stop></SignUp>

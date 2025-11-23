@@ -1,36 +1,68 @@
 <!--TODO: Fix styling -->
 <template>
-  <div class="relative bg-white p-4">
-    <button @click="state.overlay = null" class="absolute top-0 right-0 p-2">✕</button>
-    <h1>Skapa konto</h1>
+  <div class="dialog space-y-4">
+    <div class="flex items-center justify-between">
+      <h1>Skapa konto</h1>
+      <button @click="state.overlay = null" class="-mr-1 rounded-lg p-2 text-gray-500">✕</button>
+    </div>
     <form @submit.prevent="verifyEmail" v-if="emailVerificationToken.length <= 0">
-      <fieldset :disabled="sendingVerificationCode">
-        <input v-model="email" type="email" placeholder="Mailadress" class="block" required />
+      <fieldset :disabled="sendingVerificationCode" class="space-y-4">
         <div class="relative w-full">
           <span
             v-if="availableUsername === true && checkedUsername === username"
-            class="absolute right-2 text-green-400"
+            class="absolute right-2 text-green-500"
             >✓</span
           >
           <span
             v-if="availableUsername === false && checkedUsername === username"
-            class="absolute right-2 text-red-400"
+            class="absolute right-2 text-red-500"
             >✕</span
           >
+          <label for="username" class="mb-2 block">Användarnamn</label>
           <input
             v-model="username"
+            id="username"
             type="text"
-            placeholder="Användarnamn"
             class="block"
             @input="scheduleCheckUserAvailability"
             @focusout="checkUserAvailability"
             required
+            autofocus
           />
         </div>
-        <input v-model="password" type="password" placeholder="Lösenord" class="block" required />
-        <input v-model="firstname" type="text" placeholder="Förnamn" class="block" />
-        <input v-model="lastname" type="text" placeholder="Efternamn" class="block" />
-        <button type="submit">
+
+        <label for="email" class="mb-2 block">E-postadress</label>
+        <input
+          v-model="email"
+          id="email"
+          type="email"
+          class="block"
+          required
+          autocomplete="email"
+        />
+
+        <label for="password" class="mb-2 block">Lösenord</label>
+        <input v-model="password" id="password" type="password" class="block" required />
+
+        <label for="firstname" class="mb-2 block">Förnamn</label>
+        <input
+          v-model="firstname"
+          id="firstname"
+          type="text"
+          class="block"
+          autocomplete="given-name"
+        />
+
+        <label for="lastname" class="mb-2 block">Efternamn</label>
+        <input
+          v-model="lastname"
+          id="lastname"
+          type="text"
+          class="block"
+          autocomplete="family-name"
+        />
+
+        <button type="submit" class="btn btn-primary mt-4">
           {{ sendingVerificationCode ? "Skickar..." : "Skicka verifieringskod" }}
         </button>
       </fieldset>
