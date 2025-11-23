@@ -34,7 +34,7 @@
   }
 
   .btn {
-    @apply rounded-xl border border-gray-300 px-3 py-2 font-bold shadow-sm focus:shadow-md;
+    @apply block rounded-xl border border-gray-300 px-3 py-2 font-bold shadow-sm focus:shadow-md;
   }
 
   .btn-primary {

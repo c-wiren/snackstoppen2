@@ -1,10 +1,12 @@
 <template>
-  <div class="relative bg-white p-4">
-    <button @click="state.overlay = null" class="absolute top-0 right-0 p-2">✕</button>
-    <h1>Ditt konto</h1>
-    <h2>{{ api.currentUser?.username }}</h2>
-    <NuxtLink :to="'/users/' + api.currentUser?.username" class="block">Din profil</NuxtLink>
-    <button @click="logout">Logga ut</button>
+  <div class="dialog min-w-72 space-y-4">
+    <div class="flex items-center justify-between">
+      <h1>Ditt konto</h1>
+      <button @click="state.overlay = null" class="p-2 text-gray-600">✕</button>
+    </div>
+    <h2 class="text-2xl">{{ api.currentUser?.username }}</h2>
+    <NuxtLink :to="'/users/' + api.currentUser?.username" class="btn w-fit">Din profil</NuxtLink>
+    <button @click="logout" class="btn">Logga ut</button>
   </div>
 </template>
 
